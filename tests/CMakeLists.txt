@@ -12,10 +12,13 @@ find_package(GTest)
 
 add_executable (demo_test "test_main.cpp" "../src/mymath.cpp")
 
-
 target_link_libraries(demo_test ${CONAN_LIBS_GTEST})
 
 gtest_discover_tests(demo_test)
+
+if(NOT WIN32)
+    add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+endif(NOT WIN32)
 
 option(COVERAGE "Generate coverage data" ON)
 if (COVERAGE)

@@ -3,7 +3,7 @@ from conans import ConanFile, CMake
 class Demo(ConanFile):
 	build_requires = "boost/1.71.0", "gtest/1.10.0"
 	generators = "cmake"
-	build_policy = "always"
+	build_policy = "missing"
 
 	def build(self):
 		cmake = CMake(self)

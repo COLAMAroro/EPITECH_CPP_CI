@@ -10,6 +10,9 @@ pip3 uninstall -y conan #We have to unfuck the default docker
 echo "Installing Conan again"
 pip3 install conan
 
+echo "Removing gtest from Conan. Don't do this in real prod code"
+rpm -e gtest gtest-devel --nodeps
+
 echo "Refreshing the environment and adding a configuration"
 eval "$(exec /usr/bin/env -i "${SHELL}" -l -c "export")" #Weird
 conan profile update settings.compiler.libcxx=libstdc++11 default

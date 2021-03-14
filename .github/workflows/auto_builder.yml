@@ -1,0 +1,63 @@
+name: Auto Builder CI
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  Linux-build:
+    name: Linux building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup the worker environment
+        uses: actions/checkout@v2
+
+      - name: Force update the submodules
+        run: git submodule update --force --recursive --init --remote
+
+      - name: Pull the epitest docker
+        run: docker pull epitechcontent/epitest-docker:latest
+
+      - name: chmod the script
+        run: chmod +x .github/scripts/build_project.sh
+
+      - name: Build the project
+        run: docker run -v "/var/run/docker.sock":"/var/run/docker.sock"
+                        -v "/home/runner/work/_temp/_github_home":"/github/home"
+                        -v "/home/runner/work/_temp/_github_workflow":"/github/workflow"
+                        -v "/home/runner/work/`echo $GITHUB_REPOSITORY | cut -d "/" -f 2`/`echo $GITHUB_REPOSITORY | cut -d "/" -f 2`":"/github/workspace"
+                        epitechcontent/epitest-docker:latest /github/workspace/.github/scripts/build_project.sh
+
+      - name: Upload the results
+        uses: actions/upload-artifact@v1
+        with:
+          name: build results
+          path: build/build_results.txt
+
+  windows-build:
+    name: Windows building
+    runs-on: windows-latest
+    steps:
+      - name: Setup the worker environment
+        uses: actions/checkout@v2
+
+      - name: Force update the submodules
+        run: git submodule update --force --recursive --init --remote
+
+      - name: Install conan from PIP
+        run: pip install conan
+
+      - name: Refreshing ENV to account for conan
+        run: C:\ProgramData\chocolatey\bin\RefreshEnv.cmd
+
+      - name: Setup the developer shell
+        run: node .github/scripts/devenv.js
+      
+      - name: Compile the project
+        run: |
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build .
+            ctest
